@@ -8,6 +8,9 @@ public class Rocket : MonoBehaviour
     bool isActive = false;
     bool isLaunched = false;
 
+    int currentSprite = 0;
+    public int CurrentSprite { get { return currentSprite; } }
+
     public bool IsActive { get { return isActive; } }
 
     private Vector3 ScaleOrigin = Vector3.zero;
@@ -17,6 +20,8 @@ public class Rocket : MonoBehaviour
 
     float t = 0;
     const float scaleLength = 1;
+    public const float Speed = 800;
+
 
 
     // Use this for initialization
@@ -63,16 +68,16 @@ public class Rocket : MonoBehaviour
             if (heading.magnitude > 0)
             {
                 Vector2 direction = heading / heading.magnitude;
-                Jet.GetComponent<Rigidbody2D>().AddForce(direction.normalized * 800);
+                Jet.GetComponent<Rigidbody2D>().AddForce(direction.normalized * Speed);
                 isLaunched = true;
-                Destroy(gameObject, 3);
+                Invoke("DestroyRocket", 3);
             }
 
         }
         if (!canMove)
         {
             Debug.Log("FadeOut");
-            Destroy(gameObject, 1);
+            Invoke("DestroyRocket", 1);
 
         }
         isActive = false;
@@ -81,10 +86,14 @@ public class Rocket : MonoBehaviour
 
     }
 
+    public void DestroyRocket()
+    {
+        RocketManager.DestroyRocket();
+        Destroy(gameObject);
+    }
 
     public void RotateToVelocity()
     {
-        Debug.Log("Rotate");
         Vector2 dir = Jet.GetComponent<Rigidbody2D>().velocity;
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         Jet.transform.localRotation = Quaternion.AngleAxis(angle, Vector3.forward);

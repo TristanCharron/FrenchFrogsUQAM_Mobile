@@ -6,7 +6,7 @@ public class RocketManager : MonoBehaviour
 {
 
     static List<Rocket> RocketList;
-    static Rocket currentRocket { get { return RocketList[RocketList.Count - 1]; } }
+    public static Rocket currentRocket { get { return RocketList[RocketList.Count - 1]; } }
 
     private static RocketManager instance;
     public static RocketManager Instance { get { return instance; } }
@@ -15,6 +15,9 @@ public class RocketManager : MonoBehaviour
 
     public delegate void RocketEvent();
     public static event RocketEvent OnInstantiateRocket, OnDestroyRocket;
+
+
+
 
     void Awake()
     {
@@ -28,7 +31,6 @@ public class RocketManager : MonoBehaviour
     void OnBegin()
     {
         RocketList = new List<Rocket>();
-        Debug.Log("Rocket Generated");
     }
 
     public static void InstantiateRocket()
@@ -44,6 +46,7 @@ public class RocketManager : MonoBehaviour
     {
         if (OnDestroyRocket != null)
             OnDestroyRocket();
+
     }
 
     static void UpdateRocket()
