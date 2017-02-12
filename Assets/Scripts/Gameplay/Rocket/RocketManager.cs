@@ -47,6 +47,8 @@ public class RocketManager : MonoBehaviour
         if (OnDestroyRocket != null)
             OnDestroyRocket();
 
+     
+
     }
 
     static void UpdateRocket()
@@ -55,7 +57,7 @@ public class RocketManager : MonoBehaviour
         {
             currentRocket.UpdateRocket();
         }
-            
+
     }
 
     static void ReleaseRocket()

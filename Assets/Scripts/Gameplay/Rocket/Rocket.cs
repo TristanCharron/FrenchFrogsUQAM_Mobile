@@ -70,16 +70,17 @@ public class Rocket : MonoBehaviour
                 Vector2 direction = heading / heading.magnitude;
                 Jet.GetComponent<Rigidbody2D>().AddForce(direction.normalized * Speed);
                 isLaunched = true;
-                Invoke("DestroyRocket", 3);
+              
             }
 
         }
         if (!canMove)
         {
             Debug.Log("FadeOut");
-            Invoke("DestroyRocket", 1);
 
         }
+
+        Invoke("DestroyRocket", 1);
         isActive = false;
 
 
@@ -89,7 +90,22 @@ public class Rocket : MonoBehaviour
     public void DestroyRocket()
     {
         RocketManager.DestroyRocket();
+        TransferRocketToServer();
         Destroy(gameObject);
+    }
+
+    void TransferRocketToServer()
+    {
+        NetworkObjectManager[] NetworkList = FindObjectsOfType(typeof(NetworkObjectManager)) as NetworkObjectManager[];
+        if (NetworkList.Length > 0)
+        {
+            NetworkList[0].CmdTransferRocket(Jet.transform.position.x,
+          Jet.GetComponent<Rigidbody2D>().velocity.x,
+          Jet.GetComponent<Rigidbody2D>().velocity.y,
+          Rocket.Speed,
+          CurrentSprite
+          );
+        }
     }
 
     public void RotateToVelocity()
