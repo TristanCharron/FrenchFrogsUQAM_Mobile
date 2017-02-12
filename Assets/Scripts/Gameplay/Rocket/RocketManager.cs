@@ -98,8 +98,7 @@ public class RocketManager : MonoBehaviour
         if (currentRocket != null && currentRocket.IsActive)
         {
             currentRocket.ReleaseRocket();
-            GameEffect.FreezeFrame();
-            GameEffect.Shake(Camera.main.gameObject,0.5f,0.4f);
+        
         }
 
     }

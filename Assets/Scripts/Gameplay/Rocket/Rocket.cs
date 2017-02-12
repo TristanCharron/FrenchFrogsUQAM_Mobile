@@ -17,6 +17,8 @@ public class Rocket : MonoBehaviour
     public bool IsActive { get { return isActive; } }
 
     public GameObject Launch, Jet, VFX_Explosion;
+    AnimationManager AnimManager;
+
     Vector2 finalVelocity;
 
     public const float Speed = 1600;
@@ -33,6 +35,8 @@ public class Rocket : MonoBehaviour
         Vector3 cursorPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10);
         transform.position = Camera.main.ScreenToWorldPoint(cursorPoint);
         transform.localRotation = Quaternion.Euler(0, 0, 0);
+
+        AnimManager = GetComponentInChildren<AnimationManager>();
 
     }
 
@@ -71,6 +75,14 @@ public class Rocket : MonoBehaviour
 
     public void ReleaseRocket()
     {
+        if (!canMove)
+        {
+            AnimManager.DisableJetAfterAnimation();
+            isActive = false;
+            return;
+        }
+          
+
         if (!isLaunched)
         {
             Vector3 heading = MouseManager.MouseToWorldCoordinate - Jet.transform.position;
@@ -80,26 +92,24 @@ public class Rocket : MonoBehaviour
                 direction = new Vector2(0,1);
 
             finalVelocity = direction.normalized * Speed;
-
-
-            VFX_Explosion.SetActive(true);
-            VFX_Explosion.transform.SetParent(transform.root);
-            VFX_Explosion.GetComponent<ParticleSystem>().startColor = ColorList[CurrentSprite];
-            VFX_Explosion.AddComponent<DelayDeath>().delay = 5;
-
-
-
+            ActivateEffect();
 
             isLaunched = true;
             GameplayManager.OnUpdateDuringGame += EaseVelocityTo;
         }
 
-        if (!canMove)
-            GetComponentInChildren<AnimationManager>().DisableJetAfterAnimation();
+            isActive = false;
 
-        isActive = false;
+    }
 
-
+    void ActivateEffect()
+    {
+        VFX_Explosion.SetActive(true);
+        VFX_Explosion.transform.SetParent(transform.root);
+        VFX_Explosion.GetComponent<ParticleSystem>().startColor = ColorList[CurrentSprite];
+        VFX_Explosion.AddComponent<DelayDeath>().delay = 5;
+        GameEffect.FreezeFrame();
+        GameEffect.Shake(Camera.main.gameObject, 0.5f, 0.4f);
 
     }
 
