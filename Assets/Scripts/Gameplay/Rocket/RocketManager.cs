@@ -10,8 +10,10 @@ public class RocketManager : MonoBehaviour
 
     private static RocketManager instance;
     public static RocketManager Instance { get { return instance; } }
-
-    public GameObject RocketPrefab, Upperbound;
+    
+    public GameObject[] RocketFire;
+    public Sprite[] RocketSprite; 
+    public GameObject RocketPrefab,Upperbound;
 
     public static Transform UpperBound_Check;
 
@@ -38,7 +40,14 @@ public class RocketManager : MonoBehaviour
 
     public static void InstantiateRocket()
     {
+        int random = Random.Range(0, instance.RocketSprite.Length);
+
         GameObject RocketPrefab = Instantiate(instance.RocketPrefab, instance.transform.root, false) as GameObject;
+        RocketPrefab.GetComponent<Rocket>().Jet.transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = instance.RocketSprite[random];
+        GameObject RocketFire = Instantiate(instance.RocketFire[random], RocketPrefab.transform.position, Quaternion.identity) as GameObject;
+        RocketFire.transform.SetParent(RocketPrefab.transform.GetChild(0), true);
+        RocketFire.transform.localPosition = new Vector3(-2, 0, 0);
+        RocketFire.transform.localEulerAngles = new Vector3(0, 270, 270);
         RocketList.Add(RocketPrefab.GetComponent<Rocket>());
 
         if (OnInstantiateRocket != null)

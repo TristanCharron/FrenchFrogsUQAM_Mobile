@@ -13,13 +13,8 @@ public class Rocket : MonoBehaviour
 
     public bool IsActive { get { return isActive; } }
 
-    private Vector3 ScaleOrigin = Vector3.zero;
-    private Vector3 ScaleEnd = Vector3.one;
-
     public GameObject Launch, Jet;
 
-    float t = 0;
-    const float scaleLength = 1.2f;
     public const float Speed = 1600;
 
 
@@ -29,7 +24,6 @@ public class Rocket : MonoBehaviour
     {
         canMove = false;
         isActive = true;
-        t = 0;
 
         Vector3 cursorPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10);
         transform.position = Camera.main.ScreenToWorldPoint(cursorPoint);
@@ -37,7 +31,7 @@ public class Rocket : MonoBehaviour
 
     }
 
-  
+
 
     public void Update()
     {
@@ -45,22 +39,23 @@ public class Rocket : MonoBehaviour
         {
             RotateToVelocity();
         }
+        else
+        {
+            Vector3 diff = Camera.main.ScreenToWorldPoint(Input.mousePosition) - Jet.transform.position;
+            diff.Normalize();
+
+            float rot_z = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
+            Jet.transform.rotation = Quaternion.Euler(0f, 0f, rot_z);
+        }
+    }
+
+    public void SetActiveRocket()
+    {
+        canMove = true;
     }
 
     public void UpdateRocket()
     {
-        if (!canMove)
-        {
-            t += Time.deltaTime;
-            if (t >= scaleLength)
-                canMove = true;
-            Jet.transform.LookAt(MouseManager.MouseToWorldCoordinate - Jet.transform.position);
-        }
-        else
-        {
-            ReleaseRocket();
-        }
-
 
     }
 
@@ -75,18 +70,15 @@ public class Rocket : MonoBehaviour
                 Vector2 direction = heading / heading.magnitude;
                 Jet.GetComponent<Rigidbody2D>().AddForce(direction.normalized * Speed);
                 isLaunched = true;
-              
+
             }
 
         }
         if (!canMove)
-        {
-            Debug.Log("FadeOut");
-            Invoke("DestroyRocket", 1);
+            GetComponentInChildren<AnimationManager>().DisableJetAfterAnimation();
 
-        }
 
-    
+
         isActive = false;
 
 
@@ -100,6 +92,11 @@ public class Rocket : MonoBehaviour
         if (Jet.transform.position.y > RocketManager.UpperBound_Check.position.y)
             TransferRocketToServer();
 
+
+        Jet.transform.GetChild(1).gameObject.AddComponent<DelayDeath>().delay = 1;
+        Jet.transform.GetChild(1).gameObject.GetComponent<ParticleSystem>().Stop();
+        Jet.transform.GetChild(1).SetParent(transform.root, true);
+        
         Destroy(gameObject);
     }
 
