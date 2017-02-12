@@ -11,6 +11,16 @@ public class MouseManager : MonoBehaviour
     static bool isMouseHeld;
     static float mouseHoldingLength;
 
+    public static Vector3 MouseToWorldCoordinate
+    {
+        get
+        {
+            Vector3 cursorPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, -10);
+            Vector3 cursorPosition = Camera.main.ScreenToWorldPoint(cursorPoint);
+            return cursorPosition;
+        }
+    }
+
 
     void Awake()
     {

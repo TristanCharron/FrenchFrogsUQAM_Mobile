@@ -19,8 +19,8 @@ public class Rocket : MonoBehaviour
     public GameObject Launch, Jet;
 
     float t = 0;
-    const float scaleLength = 1;
-    public const float Speed = 800;
+    const float scaleLength = 1.2f;
+    public const float Speed = 1600;
 
 
 
@@ -37,6 +37,8 @@ public class Rocket : MonoBehaviour
 
     }
 
+  
+
     public void Update()
     {
         if (isLaunched)
@@ -52,6 +54,11 @@ public class Rocket : MonoBehaviour
             t += Time.deltaTime;
             if (t >= scaleLength)
                 canMove = true;
+            Jet.transform.LookAt(MouseManager.MouseToWorldCoordinate - Jet.transform.position);
+        }
+        else
+        {
+            ReleaseRocket();
         }
 
 
@@ -61,9 +68,7 @@ public class Rocket : MonoBehaviour
     {
         if (!isLaunched)
         {
-            Vector3 cursorPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, transform.position.z - Camera.main.transform.position.z);
-            Vector3 cursorPosition = Camera.main.ScreenToWorldPoint(cursorPoint);
-            Vector3 heading = cursorPosition - Jet.transform.position;
+            Vector3 heading = MouseManager.MouseToWorldCoordinate - Jet.transform.position;
 
             if (heading.magnitude > 0)
             {
@@ -77,10 +82,11 @@ public class Rocket : MonoBehaviour
         if (!canMove)
         {
             Debug.Log("FadeOut");
+            Invoke("DestroyRocket", 1);
 
         }
 
-        Invoke("DestroyRocket", 1);
+    
         isActive = false;
 
 
@@ -90,7 +96,10 @@ public class Rocket : MonoBehaviour
     public void DestroyRocket()
     {
         RocketManager.DestroyRocket();
-        TransferRocketToServer();
+
+        if (Jet.transform.position.y > RocketManager.UpperBound_Check.position.y)
+            TransferRocketToServer();
+
         Destroy(gameObject);
     }
 
@@ -100,9 +109,8 @@ public class Rocket : MonoBehaviour
         if (NetworkList.Length > 0)
         {
             NetworkList[0].CmdTransferRocket(Jet.transform.position.x,
-          Jet.GetComponent<Rigidbody2D>().velocity.x,
-          Jet.GetComponent<Rigidbody2D>().velocity.y,
-          Rocket.Speed,
+          Jet.transform.eulerAngles.z - 90,
+          800,
           CurrentSprite
           );
         }

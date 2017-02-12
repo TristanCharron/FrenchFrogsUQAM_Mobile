@@ -11,7 +11,9 @@ public class RocketManager : MonoBehaviour
     private static RocketManager instance;
     public static RocketManager Instance { get { return instance; } }
 
-    public GameObject RocketPrefab;
+    public GameObject RocketPrefab, Upperbound;
+
+    public static Transform UpperBound_Check;
 
     public delegate void RocketEvent();
     public static event RocketEvent OnInstantiateRocket, OnDestroyRocket;
@@ -22,6 +24,7 @@ public class RocketManager : MonoBehaviour
     void Awake()
     {
         instance = this;
+        UpperBound_Check = Upperbound.transform;
         GameplayManager.OnBeginGame += OnBegin;
         MouseManager.OnLeftMouseClick += InstantiateRocket;
         MouseManager.OnHoldMouse += UpdateRocket;
