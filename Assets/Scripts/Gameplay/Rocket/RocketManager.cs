@@ -15,7 +15,10 @@ public class RocketManager : MonoBehaviour
     public Sprite[] RocketSprite; 
     public GameObject RocketPrefab,Upperbound;
 
+    public GlitchEffectShader Glitcher;
+
     public static Transform UpperBound_Check;
+    static bool canGenerateRocket = true;
 
     public delegate void RocketEvent();
     public static event RocketEvent OnInstantiateRocket, OnDestroyRocket;
@@ -40,18 +43,36 @@ public class RocketManager : MonoBehaviour
 
     public static void InstantiateRocket()
     {
-        int random = Random.Range(0, instance.RocketSprite.Length);
+        if (!canGenerateRocket)
+            return;
 
+        InstantiateRocketPrefab();
+
+        instance.StartCoroutine(instance.CooldownRocketManager());
+
+        if (OnInstantiateRocket != null)
+            OnInstantiateRocket();
+    }
+
+    static void InstantiateRocketPrefab()
+    {
+        int random = Random.Range(0, instance.RocketSprite.Length);
         GameObject RocketPrefab = Instantiate(instance.RocketPrefab, instance.transform.root, false) as GameObject;
         RocketPrefab.GetComponent<Rocket>().Jet.transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = instance.RocketSprite[random];
+        RocketPrefab.GetComponent<Rocket>().SetCurrentSpriteIndex(random);
         GameObject RocketFire = Instantiate(instance.RocketFire[random], RocketPrefab.transform.position, Quaternion.identity) as GameObject;
         RocketFire.transform.SetParent(RocketPrefab.transform.GetChild(0), true);
         RocketFire.transform.localPosition = new Vector3(-2, 0, 0);
         RocketFire.transform.localEulerAngles = new Vector3(0, 270, 270);
         RocketList.Add(RocketPrefab.GetComponent<Rocket>());
+    }
 
-        if (OnInstantiateRocket != null)
-            OnInstantiateRocket();
+    public IEnumerator CooldownRocketManager()
+    {
+        canGenerateRocket = false;
+        yield return new WaitForSeconds(MouseManager.mouseThreshold);
+        canGenerateRocket = true;
+        yield break;
     }
 
     public static void DestroyRocket()
@@ -77,6 +98,8 @@ public class RocketManager : MonoBehaviour
         if (currentRocket != null && currentRocket.IsActive)
         {
             currentRocket.ReleaseRocket();
+            GameEffect.FreezeFrame();
+            GameEffect.Shake(Camera.main.gameObject,0.5f,0.4f);
         }
 
     }

@@ -20,29 +20,40 @@ public class AnimationManager : MonoBehaviour {
 
     public void EnableJet()
     {
-        if(isAnimationCompleted)
+        if (isAnimationCompleted)
         {
             Jet.SetActive(true);
             Owner.GetComponent<Rocket>().SetActiveRocket();
         }
+        else
+            Destroy(Owner.gameObject);
 
     }
 
     public void DisableJetAfterAnimation()
     {
+
         isAnimationCompleted = false;
         GameplayManager.OnUpdateDuringGame += FadeOut;
     }
 
     public void FadeOut()
     {
-        t += Time.deltaTime;
-        sRenderer.color = Color.Lerp(colorIn, colorOut, t);
+        if(sRenderer != null)
+        {
+            t += Time.deltaTime;
+            sRenderer.color = Color.Lerp(colorIn, colorOut, t);
 
-        if (t >= 1)
+            if (t >= 1)
+            {
+                GameplayManager.OnUpdateDuringGame -= FadeOut;
+                Destroy(Owner.gameObject);
+            }
+        }
+        else
         {
             GameplayManager.OnUpdateDuringGame -= FadeOut;
-            Destroy(Owner.gameObject);
         }
+     
     }
 }

@@ -10,6 +10,7 @@ public class MouseManager : MonoBehaviour
 
     static bool isMouseHeld;
     static float mouseHoldingLength;
+    public const float mouseThreshold = 0.2f;
 
     public static Vector3 MouseToWorldCoordinate
     {
@@ -37,7 +38,7 @@ public class MouseManager : MonoBehaviour
 
     static void OnUpdate()
     {
-        if (Input.GetMouseButtonDown(0) && mouseHoldingLength == 0)
+        if (Input.GetMouseButtonDown(0))
             PressMouseClick();
 
 

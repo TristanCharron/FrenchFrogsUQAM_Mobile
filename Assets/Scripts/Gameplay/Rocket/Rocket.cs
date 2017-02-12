@@ -8,14 +8,19 @@ public class Rocket : MonoBehaviour
     bool isActive = false;
     bool isLaunched = false;
 
+    [SerializeField]
+    private Color[] ColorList;
+
     int currentSprite = 0;
     public int CurrentSprite { get { return currentSprite; } }
 
     public bool IsActive { get { return isActive; } }
 
-    public GameObject Launch, Jet;
+    public GameObject Launch, Jet, VFX_Explosion;
+    Vector2 finalVelocity;
 
     public const float Speed = 1600;
+    float t = 0;
 
 
 
@@ -35,11 +40,7 @@ public class Rocket : MonoBehaviour
 
     public void Update()
     {
-        if (isLaunched)
-        {
-            RotateToVelocity();
-        }
-        else
+        if (!isLaunched)
         {
             Vector3 diff = Camera.main.ScreenToWorldPoint(Input.mousePosition) - Jet.transform.position;
             diff.Normalize();
@@ -47,6 +48,15 @@ public class Rocket : MonoBehaviour
             float rot_z = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
             Jet.transform.rotation = Quaternion.Euler(0f, 0f, rot_z);
         }
+
+
+    }
+
+
+
+    public void SetCurrentSpriteIndex(int index)
+    {
+        currentSprite = index;
     }
 
     public void SetActiveRocket()
@@ -64,24 +74,49 @@ public class Rocket : MonoBehaviour
         if (!isLaunched)
         {
             Vector3 heading = MouseManager.MouseToWorldCoordinate - Jet.transform.position;
+            Vector2 direction = heading / heading.magnitude;
 
-            if (heading.magnitude > 0)
-            {
-                Vector2 direction = heading / heading.magnitude;
-                Jet.GetComponent<Rigidbody2D>().AddForce(direction.normalized * Speed);
-                isLaunched = true;
+            if (direction == Vector2.zero)
+                direction = new Vector2(0,1);
 
-            }
+            finalVelocity = direction.normalized * Speed;
 
+
+            VFX_Explosion.SetActive(true);
+            VFX_Explosion.transform.SetParent(transform.root);
+            VFX_Explosion.GetComponent<ParticleSystem>().startColor = ColorList[CurrentSprite];
+            VFX_Explosion.AddComponent<DelayDeath>().delay = 5;
+
+
+
+
+            isLaunched = true;
+            GameplayManager.OnUpdateDuringGame += EaseVelocityTo;
         }
+
         if (!canMove)
             GetComponentInChildren<AnimationManager>().DisableJetAfterAnimation();
-
-
 
         isActive = false;
 
 
+
+    }
+
+    public void EaseVelocityTo()
+    {
+        t += Time.deltaTime;
+
+        if (t >= 1 || Jet == null)
+        {
+            GameplayManager.OnUpdateDuringGame -= EaseVelocityTo;
+        }
+        else
+        {
+            Rigidbody2D rigidbody = Jet.GetComponent<Rigidbody2D>();
+            rigidbody.AddForce(Vector2.Lerp(finalVelocity / 10, finalVelocity, t));
+
+        }
 
     }
 
@@ -96,7 +131,7 @@ public class Rocket : MonoBehaviour
         Jet.transform.GetChild(1).gameObject.AddComponent<DelayDeath>().delay = 1;
         Jet.transform.GetChild(1).gameObject.GetComponent<ParticleSystem>().Stop();
         Jet.transform.GetChild(1).SetParent(transform.root, true);
-        
+
         Destroy(gameObject);
     }
 

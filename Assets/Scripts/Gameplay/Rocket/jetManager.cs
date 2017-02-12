@@ -12,6 +12,7 @@ public class jetManager : MonoBehaviour {
         {
             isOutOfScreen = true;
             GetComponentInParent<Rocket>().DestroyRocket();
+
         }
      
     }
